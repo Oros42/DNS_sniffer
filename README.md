@@ -30,7 +30,7 @@ sudo python dns_sniffer.py -i eth0
 Examples
 ========
   
-Example you open Firefox :  
+When you open Firefox :  
 ```
 $ sudo python dns_sniffer.py
 IP source | DNS server | nb request | DNS
@@ -53,7 +53,7 @@ IP source | DNS server | nb request | DNS
 
 ```
   
-If you use a local DNS cache :  
+When you use a local DNS cache :  
 ```
 $ sudo python dns_sniffer.py
 IP source | DNS server | nb request | DNS
