@@ -38,7 +38,7 @@ def process(pkt):
 			dns_liste[pkt[IP].dst][pkt[IP].src][dns]+=1
 
 		system('clear')
-		print("IP source | DNS server | nb request | DNS")
+		print("IP source | DNS server | nb DNS request | DNS")
 		for ip in dns_liste:
 			print("{} :".format(ip)) # IP source
 			for dns_server in dns_liste[ip]:

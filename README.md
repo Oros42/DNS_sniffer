@@ -33,7 +33,7 @@ Examples
 When you open Firefox :  
 ```
 $ sudo python dns_sniffer.py
-IP source | DNS server | nb request | DNS
+IP source | DNS server | nb DNS request | DNS
 192.168.13.37 :
 	192.168.13.254 :
 		1	: www.mozilla.org.
@@ -56,7 +56,7 @@ IP source | DNS server | nb request | DNS
 When you use a local DNS cache :  
 ```
 $ sudo python dns_sniffer.py
-IP source | DNS server | nb request | DNS
+IP source | DNS server | nb DNS request | DNS
 127.0.0.1 :
 	127.0.1.1 :
 		26	: icons.duckduckgo.com.
