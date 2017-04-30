@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 # author : Oros
-# version : 2015/08/21
+# version : 2017/04/30
 
 from os import system
 from optparse import OptionParser
@@ -17,34 +17,34 @@ except ImportError:
 	exit("\033[31mYou need to setup python-scapy\033[0m\nsudo apt-get install python-scapy")
 
 
-dns_liste={}
+queries_liste={}
 
 def process(pkt):
 	if pkt.haslayer(DNSQR) and pkt[UDP].sport==53:
 		# pkt[IP].dst == IP source of the DNS request
 		# pkt[IP].src == IP of the DNS server
 		# pkt[DNS].an.rrname == DNS name
-		dns=pkt[DNS].an.rrname if pkt[DNS].an != None else "?"
+		query=pkt[DNS].an.rrname if pkt[DNS].an != None else "?"
 
-		if not pkt[IP].dst in dns_liste:
-			dns_liste[pkt[IP].dst]={}
+		if not pkt[IP].dst in queries_liste:
+			queries_liste[pkt[IP].dst]={}
 
-		if not pkt[IP].src in dns_liste[pkt[IP].dst]:
-			dns_liste[pkt[IP].dst][pkt[IP].src]={}
+		if not pkt[IP].src in queries_liste[pkt[IP].dst]:
+			queries_liste[pkt[IP].dst][pkt[IP].src]={}
 		
-		if not dns in dns_liste[pkt[IP].dst][pkt[IP].src]:
-			dns_liste[pkt[IP].dst][pkt[IP].src][dns]=1
+		if not query in queries_liste[pkt[IP].dst][pkt[IP].src]:
+			queries_liste[pkt[IP].dst][pkt[IP].src][query]=1
 		else:
-			dns_liste[pkt[IP].dst][pkt[IP].src][dns]+=1
+			queries_liste[pkt[IP].dst][pkt[IP].src][query]+=1
 
 		system('clear')
-		print("IP source | DNS server | nb DNS request | DNS")
-		for ip in dns_liste:
-			print("{} :".format(ip)) # IP source
-			for dns_server in dns_liste[ip]:
-				print("\t{} :".format(dns_server)) # IP of DNS server
-				for dns in dns_liste[ip][dns_server]:
-					print("\t\t{}\t: {}".format(dns_liste[ip][dns_server][dns],dns)) # nb request | DNS
+		print("{:15s} | {:15s} | {:15s} | {}".format("IP source", "DNS server", "Count DNS request", "Query"))
+		for ip in queries_liste:
+			print("{:15s}".format(ip)) # IP source
+			for query_server in queries_liste[ip]:
+				print(" "*18+"{:15s}".format(query_server)) # IP of DNS server
+				for query in queries_liste[ip][query_server]:
+					print(" "*36+"{:19s} {}".format(str(queries_liste[ip][query_server][query]),query)) # Count DNS request | DNS
 
 
 parser = OptionParser(usage="%prog: [options]")
@@ -52,7 +52,7 @@ parser.add_option("-i", "--iface", dest="iface", default='', help="Interface")
 (options, args) = parser.parse_args()
 
 system('clear')
-print("IP source | nb request | DNS")
+print("{:15s} | {:15s} | {:15s} | {}".format("IP source", "DNS server", "Count DNS request", "Query"))
 
 if options.iface != "":
 	sniff(filter='udp port 53', store=0, prn=process, iface=options.iface)
