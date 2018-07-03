@@ -15,20 +15,37 @@ Help
 python dns_sniffer.py -h
 ```
 
-Use
-===
+Examples of Use
+===============
 
 ```
 sudo python dns_sniffer.py
 ```
   
-On a specific interface :
+For a specific interface :  
 ```
 sudo python dns_sniffer.py -i eth0
 ```
+  
+If you want to log in a database :  
+```
+sudo python dns_sniffer.py -d db.sqlite
+sudo python dns_sniffer.py -d db.sqlite -i eth0
+```
+or with quiet  
+```
+sudo python dns_sniffer.py -d db.sqlite -q
+sudo python dns_sniffer.py -d db.sqlite -i eth0 -q
+```
+  
+Export the sqlite database to CSV :  
+```
+sudo python dns_sniffer.py -d db.sqlite -e db.csv
+```
 
-Examples
-========
+
+Examples of ouput
+=================
   
 When you open Firefox :  
 ```
