@@ -14,12 +14,11 @@ databaseCursor = None
 def process(pkt):
 	global quiet
 	global databaseConn
-	if pkt.haslayer(DNSQR) and UDP in pkt and pkt[UDP].sport == 53:
+	if pkt.haslayer(DNSQR) and UDP in pkt and pkt[UDP].sport == 53 and IP in pkt:
 		# pkt[IP].dst == IP source of the DNS request
 		# pkt[IP].src == IP of the DNS server
 		# pkt[DNS].an.rrname == DNS name
 		query = pkt[DNS].an.rrname if pkt[DNS].an != None else "?"
-
 		if not pkt[IP].dst in queries_liste:
 			queries_liste[pkt[IP].dst] = {}
 
