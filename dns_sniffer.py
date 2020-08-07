@@ -1,7 +1,7 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # author : Oros
-# version : 2018/07/03
+# version : 2020/08/07
 
 from os import system
 from optparse import OptionParser
