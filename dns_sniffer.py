@@ -14,36 +14,38 @@ databaseCursor = None
 def process(pkt):
 	global quiet
 	global databaseConn
-	if pkt.haslayer(DNSQR) and UDP in pkt and pkt[UDP].sport == 53 and IP in pkt:
+	ip46 = IPv6 if IPv6 in pkt else IP
+	if pkt.haslayer(DNSQR) and UDP in pkt and pkt[UDP].sport == 53 and ip46 in pkt:
 		# pkt[IP].dst == IP source of the DNS request
 		# pkt[IP].src == IP of the DNS server
-		# pkt[DNS].an.rrname == DNS name
-		query = pkt[DNS].an.rrname if pkt[DNS].an != None else "?"
-		if not pkt[IP].dst in queries_liste:
-			queries_liste[pkt[IP].dst] = {}
+		# pkt[DNS].qd.qname == DNS name
+		query = pkt[DNS].qd.qname.decode("utf-8") if pkt[DNS].qd != None else "?"
 
-		if not pkt[IP].src in queries_liste[pkt[IP].dst]:
-			queries_liste[pkt[IP].dst][pkt[IP].src] = {}
+		if not pkt[ip46].dst in queries_liste:
+			queries_liste[pkt[ip46].dst] = {}
+
+		if not pkt[ip46].src in queries_liste[pkt[ip46].dst]:
+			queries_liste[pkt[ip46].dst][pkt[ip46].src] = {}
 		
-		if not query in queries_liste[pkt[IP].dst][pkt[IP].src]:
-			queries_liste[pkt[IP].dst][pkt[IP].src][query] = 1
+		if not query in queries_liste[pkt[ip46].dst][pkt[ip46].src]:
+			queries_liste[pkt[ip46].dst][pkt[ip46].src][query] = 1
 		else:
-			queries_liste[pkt[IP].dst][pkt[IP].src][query] += 1
+			queries_liste[pkt[ip46].dst][pkt[ip46].src][query] += 1
 
-		if databaseConn and query != None and None != "?":
+		if databaseConn and query != None and query != "?":
 			databaseCursor.execute("INSERT OR IGNORE INTO domains (domain) VALUES (?);", (query,))
 			databaseConn.commit()
 
 			databaseCursor.execute("SELECT idDomain FROM domains WHERE domain=?;", (query,))
 			domainId = databaseCursor.fetchone()[0]
 
-			databaseCursor.execute("SELECT count, idWhoAsk FROM whoAsk WHERE ipFrom=? AND ipTo=? AND domainId=?;", (pkt[IP].src, pkt[IP].dst, domainId))
+			databaseCursor.execute("SELECT count, idWhoAsk FROM whoAsk WHERE ipFrom=? AND ipTo=? AND domainId=?;", (pkt[ip46].src, pkt[ip46].dst, domainId))
 			whoAsk = databaseCursor.fetchone()
 
 			if whoAsk:
 				databaseCursor.execute("UPDATE whoAsk SET count=? WHERE idWhoAsk=?",(whoAsk[0]+1 if whoAsk[0] else 2, whoAsk[1]))
 			else:
-				databaseCursor.execute("INSERT INTO whoAsk (ipFrom, ipTo, domainId, count) VALUES (?,?,?,1);", (pkt[IP].src, pkt[IP].dst, domainId))
+				databaseCursor.execute("INSERT INTO whoAsk (ipFrom, ipTo, domainId, count) VALUES (?,?,?,1);", (pkt[ip46].src, pkt[ip46].dst, domainId))
 
 			databaseConn.commit()
 
@@ -118,10 +120,11 @@ if __name__ == "__main__":
 			from scapy.all import DNSQR
 			from scapy.all import UDP
 			from scapy.all import IP
+			from scapy.all import IPv6
 			from scapy.all import DNS
 		except ImportError:
 			from sys import exit
-			exit("\033[31mYou need to setup python-scapy\033[0m\nsudo apt install python-scapy")
+			exit("\033[31mYou need to setup python3-scapy\033[0m\nsudo apt install python3-scapy")
 
 		if not quiet:
 			system('clear')
